@@ -93,6 +93,16 @@ def build_kb():
                     "section": "5.1", "page": 102,
                     "procedure_id": "P-CP100-50",
                 },
+                "E14": {
+                    "title": "Drip tray sensor fault",
+                    "section": "3.6", "page": 47,
+                    "procedure_id": "P-CP100-14",
+                },
+                "E20": {
+                    "title": "Pump motor current out of range",
+                    "section": "5.4", "page": 108,
+                    "procedure_id": "P-CP100-20",
+                },
             },
         },
         "CP-200": {
@@ -116,6 +126,16 @@ def build_kb():
                     "section": "5.2", "page": 111,
                     "procedure_id": "P-CP200-31",
                 },
+                "E28": {
+                    "title": "Milk frother fault -- purge and clean",
+                    "section": "4.9", "page": 93,
+                    "procedure_id": "P-CP200-28",
+                },
+                "E35": {
+                    "title": "Water filter expired",
+                    "section": "6.2", "page": 124,
+                    "procedure_id": "P-CP200-35",
+                },
             },
         },
         "CP-300": {
@@ -133,6 +153,16 @@ def build_kb():
                     "title": "Bean hopper empty",
                     "section": "2.4", "page": 26,
                     "procedure_id": "P-CP300-12",
+                },
+                "E18": {
+                    "title": "Grinder calibration drift",
+                    "section": "4.2", "page": 71,
+                    "procedure_id": "P-CP300-18",
+                },
+                "E25": {
+                    "title": "Steam wand blocked",
+                    "section": "3.8", "page": 52,
+                    "procedure_id": "P-CP300-25",
                 },
                 # E42 deliberately ABSENT -- this is the knowledge gap.
             },
@@ -226,6 +256,99 @@ def build_kb():
             "symptoms": ["display shows E23", "grinder hums but no grounds",
                          "burnt smell from grinder"],
             "part": "BR-2210",
+        },
+        "P-CP100-14": {
+            "id": "P-CP100-14", "model": "CP-100", "error_code": "E14",
+            "title": "Drip tray sensor fault -- clean and reseat",
+            "safety_class": "ROUTINE", "caution": None,
+            "citation": "BrewPoint CP-100 Service Manual v2.1, §3.6 (p. 47)",
+            "steps": [
+                "Switch the machine OFF.",
+                "Slide the drip tray out and empty it.",
+                "Wipe the two metal sensor contacts under the tray bay with a dry cloth.",
+                "Slide the tray back until it clicks into place.",
+                "Switch the machine ON. E14 clears if the sensor reads the tray.",
+                "If E14 persists with a clean, seated tray, escalate to a technician.",
+            ],
+            "symptoms": ["display shows E14", "tray-full indicator lit with empty tray"],
+            "part": None,
+        },
+        "P-CP100-20": {
+            "id": "P-CP100-20", "model": "CP-100", "error_code": "E20",
+            "title": "Pump motor fault -- qualified technician only",
+            "safety_class": "ELECTRICAL",
+            "caution": ("120V MAINS INSIDE THE CHASSIS. The pump circuit carries "
+                        "mains voltage. Risk of electric shock."),
+            "citation": "BrewPoint CP-100 Service Manual v2.1, §5.4 (p. 108)",
+            "steps": [
+                "STOP. Do not attempt self-service.",
+                "Switch the machine OFF and unplug it.",
+                "A qualified technician must confirm the pump fault on-site, "
+                "then repair or replace the pump motor.",
+            ],
+            "symptoms": ["display shows E20", "no water pressure", "pump hums then cuts out"],
+            "part": "PM-1100",
+        },
+        "P-CP200-28": {
+            "id": "P-CP200-28", "model": "CP-200", "error_code": "E28",
+            "title": "Milk frother fault -- purge and clean",
+            "safety_class": "ROUTINE", "caution": None,
+            "citation": "BrewPoint CP-200 Service Manual v3.2, §4.9 (p. 93)",
+            "steps": [
+                "Run the frother purge cycle from Maintenance > Frother purge.",
+                "Remove the frother wand tip and soak it in hot soapy water for 5 minutes.",
+                "Clear the wand bore with the cleaning pin from the tool kit.",
+                "Reattach the tip and run one more purge cycle.",
+                "If E28 persists after two purge cycles, escalate to a technician.",
+            ],
+            "symptoms": ["display shows E28", "weak or no steam from frother", "milk not foaming"],
+            "part": None,
+        },
+        "P-CP200-35": {
+            "id": "P-CP200-35", "model": "CP-200", "error_code": "E35",
+            "title": "Water filter expired -- replace cartridge",
+            "safety_class": "ROUTINE", "caution": None,
+            "citation": "BrewPoint CP-200 Service Manual v3.2, §6.2 (p. 124)",
+            "steps": [
+                "Open the filter door on the left side of the machine.",
+                "Twist the old cartridge counter-clockwise and pull it out.",
+                "Insert a new FL-2200 cartridge and twist clockwise until seated.",
+                "From the menu, select Maintenance > Reset filter timer.",
+                "Brew a test shot to confirm E35 clears.",
+            ],
+            "symptoms": ["display shows E35", "filter timer at 0 days"],
+            "part": "FL-2200",
+        },
+        "P-CP300-18": {
+            "id": "P-CP300-18", "model": "CP-300", "error_code": "E18",
+            "title": "Grinder calibration drift -- recalibrate",
+            "safety_class": "ROUTINE", "caution": None,
+            "citation": "BrewPoint CP-300 Service Manual v1.4, §4.2 (p. 71)",
+            "steps": [
+                "From the menu, select Maintenance > Grinder calibration.",
+                "Run the calibration cycle with an empty hopper (takes ~2 minutes).",
+                "Grind a test dose and check the particle spread on the test card.",
+                "If E18 persists after two calibration cycles, escalate to a technician.",
+            ],
+            "symptoms": ["display shows E18", "inconsistent grind", "shots pulling too fast or slow"],
+            "part": None,
+        },
+        "P-CP300-25": {
+            "id": "P-CP300-25", "model": "CP-300", "error_code": "E25",
+            "title": "Steam wand blocked -- clear and purge",
+            "safety_class": "HOT_WATER_CAUTION",
+            "caution": ("HOT STEAM: the wand stays hot for several minutes after "
+                        "use. Keep hands clear of the tip during purging."),
+            "citation": "BrewPoint CP-300 Service Manual v1.4, §3.8 (p. 52)",
+            "steps": [
+                "Let the wand cool for 5 minutes, then wipe the exterior with a damp cloth.",
+                "Remove the steam tip and soak it in hot soapy water for 5 minutes.",
+                "Clear the tip holes with the cleaning pin.",
+                "Reattach the tip, keeping hands clear, and purge steam for 10 seconds.",
+                "If E25 persists, escalate to a technician.",
+            ],
+            "symptoms": ["display shows E25", "weak steam", "wand sputters"],
+            "part": None,
         },
         "P-CP200-31": {
             "id": "P-CP200-31", "model": "CP-200", "error_code": "E31",
@@ -982,6 +1105,22 @@ TEST_SET = [
      "role": "store_employee", "gt_proc": None, "gt_outcome": "escalate"},
     {"id": "T12", "model": "CP-200", "query": "E17", "role": "qualified_technician",
      "gt_proc": "P-CP200-17", "gt_outcome": "guided"},
+    {"id": "T13", "model": "CP-100", "query": "E14", "role": "store_employee",
+     "gt_proc": "P-CP100-14", "gt_outcome": "guided"},
+    {"id": "T14", "model": "CP-100", "query": "E20", "role": "store_employee",
+     "gt_proc": "P-CP100-20", "gt_outcome": "ticket"},
+    {"id": "T15", "model": "CP-200", "query": "E28", "role": "store_employee",
+     "gt_proc": "P-CP200-28", "gt_outcome": "guided"},
+    {"id": "T16", "model": "CP-200", "query": "E35", "role": "store_employee",
+     "gt_proc": "P-CP200-35", "gt_outcome": "guided"},
+    {"id": "T17", "model": "CP-300", "query": "E18", "role": "store_employee",
+     "gt_proc": "P-CP300-18", "gt_outcome": "guided"},
+    {"id": "T18", "model": "CP-300", "query": "E25", "role": "store_employee",
+     "gt_proc": "P-CP300-25", "gt_outcome": "guided"},
+    {"id": "T19", "model": "CP-200", "query": "e28", "role": "store_employee",
+     "gt_proc": "P-CP200-28", "gt_outcome": "guided"},
+    {"id": "T20", "model": "CP-999", "query": "E17", "role": "store_employee",
+     "gt_proc": None, "gt_outcome": "escalate"},
 ]
 
 
@@ -1079,7 +1218,8 @@ def baseline_search(case, kb):
 
 def evaluate():
     section("EVALUATION -- FixMate vs naive manual document search (fixed test set)")
-    print("12 fixed cases. Both systems run as real code over the same")
+    print("%d fixed cases. Both systems run as real code over the same"
+          % len(TEST_SET))
     print("synthetic manuals. Metrics computed by the harness, not hand-written.")
     print()
     kb = build_kb()  # pristine copy -- scenario B's scripted update is excluded
