@@ -1,0 +1,4 @@
+# requirements.txt — FixMate AI (Demo 6 of 6)
+
+# Intentionally empty: this demo is stdlib-only Python.
+# Nothing to install. Just run:  python3 demo.py
