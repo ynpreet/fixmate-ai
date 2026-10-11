@@ -84,6 +84,15 @@ def run_custom(params):
         print()
         internal = DEMO.search_internal_manual(model, code, kb)
         if internal:
+            ver = DEMO.check_document_version(model, kb)
+            if ver.get("superseded_by"):
+                print("GUARDRAIL: indexed manual v%s is SUPERSEDED by v%s -- the old "
+                      "manual is NOT trusted. No guided fix; escalating to a qualified "
+                      "technician for the current procedure."
+                      % (ver["version"], ver["superseded_by"]))
+                print()
+                print("Same rules, your error code -- including codes the manual never heard of.")
+                return out.getvalue()
             print("INTERNAL MANUAL HIT: %s" % internal["citation"])
             print("Fault: %s" % internal["title"])
             print("Safety class: %s" % internal["safety_class"])
