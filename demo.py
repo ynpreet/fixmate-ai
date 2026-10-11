@@ -1058,17 +1058,28 @@ def scenario_c(kb):
         ticket["status"] = status
         print("  [%s] %s" % (status, note))
     qty = check_part_availability(proc["part"], kb)
-    ticket["part_availability"] = "%d in stock" % qty
-    print("  [PART_ORDERED] HE-2200 ordered from regional depot -- only now, "
-          "after on-site verification.")
-    ticket["status"] = "PART_ORDERED"
-    print("  [INSTALLED] technician replaced the heating element; machine heats; E31 cleared.")
-    ticket["status"] = "RESOLVED"
-    verify_resolution(ticket["ticket_id"],
-                      "E31 cleared; heat-up test passed (technician sign-off)")
-    decide("SCENARIO C complete: unsafe self-service refused, structured "
-           "ticket created with a SUSPECTED->CONFIRMED trail, part ordered "
-           "only after verification, resolution verified.")
+    ticket["part_availability"] = ("%d in stock" % qty if qty
+                                   else "OUT OF STOCK")
+    if qty:
+        print("  [PART_ORDERED] HE-2200 ordered from regional depot -- only now, "
+              "after on-site verification.")
+        ticket["status"] = "PART_ORDERED"
+        print("  [INSTALLED] technician replaced the heating element; machine heats; E31 cleared.")
+        ticket["status"] = "RESOLVED"
+        verify_resolution(ticket["ticket_id"],
+                          "E31 cleared; heat-up test passed (technician sign-off)")
+        decide("SCENARIO C complete: unsafe self-service refused, structured "
+               "ticket created with a SUSPECTED->CONFIRMED trail, part ordered "
+               "only after verification, resolution verified.")
+    else:
+        # T5/safety: zero inventory -- the part dependency stays unresolved.
+        # Never claim the part is ordered or the repair is complete.
+        print("  [PART_UNAVAILABLE] part is OUT OF STOCK -- flagged on the ticket; "
+              "manager notified to order it and reschedule the dispatch.")
+        ticket["status"] = "AWAITING_PART"
+        decide("SCENARIO C complete: unsafe self-service refused, structured "
+               "ticket created with a SUSPECTED->CONFIRMED trail. Repair NOT "
+               "complete -- unresolved dependency: part out of stock.")
     return 9
 
 # ---------------------------------------------------------------------------
@@ -1148,6 +1159,16 @@ def fixmate_policy(case, kb):
                 break
     if proc is not None:
         steps += 1  # check_document_version
+        newer = kb["manuals"][model].get("superseded_by")
+        if newer:
+            # T4/safety: the indexed manual is SUPERSEDED -- never trust the
+            # old procedure as current. Escalate and log a version gap
+            # instead of guiding from the stale manual.
+            steps += 1  # escalate (version gap)
+            steps += 1  # log_knowledge_gap
+            return ({"outcome": "escalate", "proc": None, "citation": None,
+                     "gap_logged": True, "ticket_fields_ok": None,
+                     "version_gap": newer}, steps)
         steps += 1  # safety_authorize
         auth = safety_authorize(proc["id"], role, kb)
         if auth["allowed"]:
@@ -1156,11 +1177,22 @@ def fixmate_policy(case, kb):
                      "citation": proc["citation"], "gap_logged": False,
                      "ticket_fields_ok": None}, steps)
         steps += 1  # create_maintenance_ticket
+        # T5/safety: record the OBSERVED part availability on the ticket --
+        # never a placeholder. A zero-stock dependency stays unresolved on
+        # the ticket and changes the next step; the repair is never marked
+        # complete on a part that isn't there.
+        qty = kb["inventory"].get(proc["part"], 0)
+        availability = "%d in stock" % qty if qty else "OUT OF STOCK"
+        next_step = ("Dispatch qualified technician for on-site confirmation"
+                     if qty else
+                     "Part OUT OF STOCK -- notify manager, order replacement "
+                     "part, and reschedule dispatch")
         t = {"ticket_id": "FM-2026-0000", "store_id": "#0000",
              "model": model, "error_code": q, "diagnosis": proc["title"],
              "diagnosis_status": "SUSPECTED", "safety_class": proc["safety_class"],
-             "part_number": proc["part"], "part_availability": "checked",
-             "status": "OPEN", "created_by_role": role, "next_step": "..."}
+             "part_number": proc["part"], "part_availability": availability,
+             "status": "OPEN", "created_by_role": role,
+             "next_step": next_step}
         fields_ok = all(f in t and t[f] for f in TICKET_FIELDS)
         steps += 1  # track to resolution
         return ({"outcome": "ticket", "proc": proc["id"],
